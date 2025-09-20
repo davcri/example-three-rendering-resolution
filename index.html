@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>three and rendering resolution across HiDPI screens</title>
+    </head>
+    <body>
+        <style>
+            #widget {
+                border-radius: 12px;
+                background-color: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                color: black;
+                position: fixed;
+                top: 50px;
+                left: 0px;
+                padding: 16px;
+                min-width: 500px;
+            }
+
+            table {
+                border-collapse: separate;
+                border-spacing: 0;
+                width: 100%;
+                background: rgba(255, 255, 255, 0.7);
+                border-radius: 6px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+                overflow: hidden;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            h3 {
+                text-transform: uppercase;
+            }
+
+            th,
+            td {
+                padding: 4px 8px;
+                text-align: left;
+                font-size: 15px;
+            }
+
+            tr {
+                transition: 'background 0.2s';
+            }
+
+            tr:nth-child(even) {
+                background: rgba(0, 0, 0, 0.03);
+            }
+
+            td:first-child {
+                color: #444;
+                font-weight: 500;
+                letter-spacing: 0.01em;
+                text-align: right;
+            }
+
+            td:last-child {
+                color: #222;
+            }
+
+            h3 {
+                margin-bottom: 8px;
+                font-weight: 600;
+                letter-spacing: 0.01em;
+            }
+
+            #progress-bar-container,
+            #megapixel-limit-group,
+            #additiona-settings {
+                background: rgba(255, 255, 255, 0.5);
+                border-radius: 12px;
+                padding: 10px;
+            }
+
+            #megapixel-limit-group .options {
+                display: flex;
+                flex-direction: column;
+                margin-left: 16px;
+                margin-top: 8px;
+            }
+
+            #megapixel-limit-group label {
+                height: 26px;
+            }
+        </style>
+
+        <canvas
+            id="canvas"
+            style="position: fixed; width: 100%; height: 100%; z-index: -1"
+        ></canvas>
+        <div id="widget">
+            <table>
+                <tr>
+                    <td style="font-weight: bold">Window DPR</td>
+                    <td>
+                        <span id="window-dpr" style="font-family: monospace; font-size: 14px"
+                            >1.0</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold">Window Initial DPR</td>
+                    <td>
+                        <span
+                            id="window-initial-dpr"
+                            style="font-family: monospace; font-size: 14px"
+                            >1.0</span
+                        >
+                    </td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold">Window size</td>
+                    <td>
+                        <span id="window-size">0x0</span>
+                        <span
+                            id="window-size-mp"
+                            style="font-family: monospace; font-size: 14px"
+                        ></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold">Renderer size</td>
+                    <td>
+                        <span id="renderer-size">0x0</span>
+                        <span
+                            id="renderer-size-mp"
+                            style="font-family: monospace; font-size: 14px; font-weight: bold"
+                            data-tooltip="DPR stands for Device Pixel Ratio"
+                        ></span>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="height: 16px"></div>
+            <div id="progress-bar-container"></div>
+            <div style="height: 16px"></div>
+            <div id="megapixel-limit-group">
+                <label>Limit rendered pixels to:</label>
+                <div class="options">
+                    <label>
+                        <input type="radio" name="megapixel-limit" value="Infinity" checked />
+                        No limit
+                    </label>
+                    <label>
+                        <input type="radio" name="megapixel-limit" value="0.92" />
+                        0.92 MP (1280x720)
+                    </label>
+                    <label>
+                        <input type="radio" name="megapixel-limit" value="2.07" />
+                        2.07 MP (1920x1080)
+                    </label>
+                    <label>
+                        <input type="radio" name="megapixel-limit" value="3.69" />
+                        3.69 MP (2560x1440)
+                    </label>
+                    <label>
+                        <input type="radio" name="megapixel-limit" value="8.29" />
+                        8.29 MP (3840x2160)
+                    </label>
+                </div>
+                <div>
+                    <br />
+                    <div>
+                        <input type="checkbox" id="update-dpr" checked />
+                        <label for="update-dpr">Renderer: update DPR on browser DPR change</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="additiona-settings" style="margin-top: 10px; margin-bottom: 10px">
+                <div>
+                    <input type="checkbox" id="autorotate-checkbox" checked />
+                    <label for="autorotate-checkbox">Cube Autorotate</label>
+                </div>
+
+                <!-- antialiasing -->
+                <!-- <input type="checkbox" id="autorotate-checkbox" checked />
+                <label for="autorotate-checkbox">Autorotate</label> -->
+            </div>
+
+            <div style="">
+                <h4>Resources</h4>
+                <ul>
+                    <li>
+                        Related article:
+                        <a href="https://www.davcri.it/posts/2025/threejs-and-hidpi/">
+                            davcri.it/posts/2025/threejs-and-hidpi/
+                        </a>
+                    </li>
+                    <li>
+                        Source code:
+                        <a href="https://github.com/davcri/example-three-rendering-resolution">
+                            github.com/davcri/example-three-rendering-resolution
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>
