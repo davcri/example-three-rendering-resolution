@@ -36,15 +36,14 @@ if (document.readyState === 'complete') {
 }
 
 function init() {
-    // setup renderer
     gRenderer = new THREE.WebGLRenderer({
         antialias: false,
         canvas: document.querySelector('#canvas')!,
     })
+    gRenderer.setPixelRatio(1) // redundant but explicitly force pixel ratio to 1 as the resizeRenderer() handles it internally
     initialDPR = window.devicePixelRatio
     document.body.appendChild(gRenderer.domElement)
 
-    // setup scene
     gCamera.position.z = 3
 
     const pmremGenerator = new THREE.PMREMGenerator(gRenderer)
@@ -206,6 +205,11 @@ function resizeRenderer(
     const pixelCount = w * h
     const renderScale = pixelCount > maxPixelCount ? Math.sqrt(maxPixelCount / pixelCount) : 1
 
+    if (renderer.getPixelRatio() !== 1) {
+        console.warn(
+            `renderer.getPixelRatio()=${renderer.getPixelRatio()} but it should be set to 1 when using this resizeRenderer().`
+        )
+    }
     canvas.width !== w || canvas.height !== h
     renderer.setSize(w * renderScale, h * renderScale, false)
 }
