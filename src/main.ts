@@ -187,7 +187,8 @@ function onWindowResize() {
 }
 
 /**
- * See https://threejs.org/manual/?q=res#en/responsive
+ * @see https://davcri.it/posts/2025/threejs-and-hidpi/
+ * @see https://threejs.org/manual/?q=res#en/responsive
  */
 function resizeRenderer(
     renderer: THREE.WebGLRenderer,
@@ -195,14 +196,14 @@ function resizeRenderer(
     maxPixelCount: number = Infinity
 ) {
     const canvas = renderer.domElement
-    const dpr = updateDPR ? window.devicePixelRatio : initialDPR
-    const w = Math.floor(canvas.clientWidth * dpr)
-    const h = Math.floor(canvas.clientHeight * dpr)
+    const pixelRatio = updateDPR ? window.devicePixelRatio : initialDPR
+    const width = Math.floor(canvas.clientWidth * pixelRatio)
+    const height = Math.floor(canvas.clientHeight * pixelRatio)
 
-    camera.aspect = w / h
+    camera.aspect = width / height
     camera.updateProjectionMatrix()
 
-    const pixelCount = w * h
+    const pixelCount = width * height
     const renderScale = pixelCount > maxPixelCount ? Math.sqrt(maxPixelCount / pixelCount) : 1
 
     if (renderer.getPixelRatio() !== 1) {
@@ -210,8 +211,12 @@ function resizeRenderer(
             `renderer.getPixelRatio()=${renderer.getPixelRatio()} but it should be set to 1 when using this resizeRenderer().`
         )
     }
-    canvas.width !== w || canvas.height !== h
-    renderer.setSize(w * renderScale, h * renderScale, false)
+    canvas.width !== width || canvas.height !== height
+    renderer.setSize(
+        Math.round(width * renderScale), 
+        Math.round(height * renderScale), 
+        false
+    )
 }
 
 function updateWidgets(renderer: THREE.WebGLRenderer, dpr = window.devicePixelRatio) {
