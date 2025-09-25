@@ -197,13 +197,13 @@ function resizeRenderer(
 ) {
     const canvas = renderer.domElement
     const pixelRatio = updateDPR ? window.devicePixelRatio : initialDPR
-    const width = Math.floor(canvas.clientWidth * pixelRatio)
-    const height = Math.floor(canvas.clientHeight * pixelRatio)
+    const width = Math.round(canvas.clientWidth * pixelRatio)
+    const height = Math.round(canvas.clientHeight * pixelRatio)
+    const pixelCount = width * height
 
+    // assume perspective camera
     camera.aspect = width / height
     camera.updateProjectionMatrix()
-
-    const pixelCount = width * height
     const renderScale = pixelCount > maxPixelCount ? Math.sqrt(maxPixelCount / pixelCount) : 1
 
     if (renderer.getPixelRatio() !== 1) {
@@ -211,12 +211,7 @@ function resizeRenderer(
             `renderer.getPixelRatio()=${renderer.getPixelRatio()} but it should be set to 1 when using this resizeRenderer().`
         )
     }
-    canvas.width !== width || canvas.height !== height
-    renderer.setSize(
-        Math.round(width * renderScale), 
-        Math.round(height * renderScale), 
-        false
-    )
+    renderer.setSize(Math.round(width * renderScale), Math.round(height * renderScale), false)
 }
 
 function updateWidgets(renderer: THREE.WebGLRenderer, dpr = window.devicePixelRatio) {
